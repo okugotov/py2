@@ -1,9 +1,10 @@
 import telnetlib
 import time
-
+import snmp_helper
 
 TELNET_PORT = 23
 TELNET_TIMEOUT = 6
+SNMP_PORT = 161
 
 class NetDevice(object):
     def __init__(self, name, ip_addr, username, password, community='public'):
@@ -49,22 +50,38 @@ class NetDevice(object):
     def Close(self):
         self.conn_id.close()
 
+    def SNMP_GetOID(self, OID):
+        
+        self.snmp_output = snmp_helper.snmp_extract(snmp_helper.snmp_get_oid((self.ip_addr, self.community, SNMP_PORT), oid = OID, display_errors=True))
+
+    def SNMP_Print(self):
+
+        print self.snmp_output
+
 def main():
     
-    router = NetDevice('pynet-rtr1', '184.105.247.70', 'pyclass', '88newclass')
+    router1 = NetDevice('pynet-rtr1', '184.105.247.70', 'pyclass', '88newclass', 'galileo')
+    router2 = NetDevice('pynet-rtr2', '184.105.247.71', 'pyclass', '88newclass', 'galileo')
 
-    print "Router: %s %s %s" % (router.ip_addr, router.username, router.community)
+    #print "Router: %s %s %s" % (router.ip_addr, router.username, router.community)
 
-    router.Connect()
+    """
+    router1.Connect()
 
 
-    router.Execute('term length 0')
-    router.Execute('show ip int brief')
-    router.Print()
+    router1.Execute('term length 0')
+    router1.Execute('show ip int brief')
+    router1.Print()
 
-    router.Execute('show version')
-    router.Print()
+    router1.Execute('show version')
+    router1.Print()
 
-    router.Close()
+    router1.Close()
+    """
+    router1.SNMP_GetOID('.1.3.6.1.2.1.1.1.0')
+    router1.SNMP_Print()
+    router2.SNMP_GetOID('.1.3.6.1.2.1.1.1.0')
+    router2.SNMP_Print()
+
 if __name__ == "__main__":
     main()
