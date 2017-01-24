@@ -1,0 +1,15 @@
+---
+
+- pynet-rtr1:
+    ip_addr: 184.105.247.70
+    username: pyclass
+    password: 88newclass
+    community: galileo
+
+- pynet-rtr2:
+    ip_addr: 184.105.247.71
+    username: pyclass
+    password: 88newclass
+    community: galileo
+
+

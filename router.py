@@ -1,10 +1,12 @@
 import telnetlib
 import time
 import snmp_helper
+import yaml
 
 TELNET_PORT = 23
 TELNET_TIMEOUT = 6
 SNMP_PORT = 161
+CONFIG_FILE = "router_list.yaml"
 
 class NetDevice(object):
     def __init__(self, name, ip_addr, username, password, community='public'):
@@ -60,10 +62,23 @@ class NetDevice(object):
 
 def main():
     
-    router1 = NetDevice('pynet-rtr1', '184.105.247.70', 'pyclass', '88newclass', 'galileo')
-    router2 = NetDevice('pynet-rtr2', '184.105.247.71', 'pyclass', '88newclass', 'galileo')
+    with open(CONFIG_FILE) as f:
+        config = yaml.load(f)
 
-    #print "Router: %s %s %s" % (router.ip_addr, router.username, router.community)
+    router_list = []
+
+    for element in config:
+        router_name = element.keys()[0]
+        router_ipaddr = element[router_name]['ip_addr']
+        router_username = element[router_name]['username']
+        router_password = element[router_name]['password']
+        router_community = element[router_name]['community']
+
+        #print "%s %s %s %s %s" % (router_name,router_ipaddr,router_username,router_password,router_community)
+
+        router_list.append(NetDevice(router_name,router_ipaddr,router_username,router_password,router_community))
+
+
 
     """
     router1.Connect()
@@ -78,10 +93,14 @@ def main():
 
     router1.Close()
     """
-    router1.SNMP_GetOID('.1.3.6.1.2.1.1.1.0')
-    router1.SNMP_Print()
-    router2.SNMP_GetOID('.1.3.6.1.2.1.1.1.0')
-    router2.SNMP_Print()
+
+    for element in router_list:
+        print "requesting data from router: %s" % element.name
+        element.SNMP_GetOID('.1.3.6.1.2.1.1.1.0')
+        element.SNMP_Print()
+        element.SNMP_GetOID('.1.3.6.1.2.1.1.5.0')
+        element.SNMP_Print()
+        print
 
 if __name__ == "__main__":
     main()
